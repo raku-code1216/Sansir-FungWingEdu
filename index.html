@@ -1250,26 +1250,17 @@
         return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
     }
 
-  // 防彈版：動態生成當週 VIP 密碼 (格式: fwsunsir + 當週星期一的 YYYYMMDD)
+// 動態生成當週隨機密碼 (利用年份與週數生成 4 位數字 PIN 碼)
     function getValidWeeklyPasscode() {
-        const today = new Date();
-        const dayOfWeek = today.getDay(); // 0 是星期日, 1 是星期一
-        const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // 計算距離本週一有幾天
+        const year = new Date().getFullYear();
+        const week = getCurrentISOWeek();
         
-        // 使用絕對時間戳記相減，徹底避免 setDate() 帶來的跨月/跨年計算錯誤
-        const mondayTime = today.getTime() - (daysToSubtract * 24 * 60 * 60 * 1000);
-        const mondayDate = new Date(mondayTime);
+        // 建立一個基於年份與週數的偽隨機演算法，確保一週內的隨機數保持不變
+        const seed = year * 100 + week; 
+        const randomPin = Math.floor(Math.abs(Math.sin(seed) * 10000)).toString().padStart(4, '0');
         
-        const yyyy = mondayDate.getFullYear();
-        const mm = String(mondayDate.getMonth() + 1).padStart(2, '0');
-        const dd = String(mondayDate.getDate()).padStart(2, '0');
-        
-        return `fwsunsir${yyyy}${mm}${dd}`; 
+        return randomPin; 
     }
-
-    document.addEventListener("DOMContentLoaded", function() {
-        checkWeeklyShareStatus();
-    });
 
     function checkWeeklyShareStatus() {
         const lastShareWeek = localStorage.getItem("fw_last_share_week");
@@ -1365,16 +1356,22 @@
         box.style.display = box.style.display === "none" ? "block" : "none";
     }
 
-// VIP 登入驗證
+// 密碼登入與管理員驗證
     function unlockByVip() {
-        const userInput = document.getElementById("vip-passcode").value.trim().toLowerCase();
+        const userInput = document.getElementById("vip-passcode").value.trim();
         const correctPasscode = getValidWeeklyPasscode(); 
-        
-        // 燊Sir 專屬除錯工具：按下 F12 可在 Console 看到系統目前預期的正確密碼
-        console.log("【風穎教育系統】本週正確密碼為: ", correctPasscode);
+        const managerPasscode = "20021216"; // 燊Sir 專屬管理員密碼
 
+        // 判斷是否為管理員登入
+        if (userInput === managerPasscode) {
+            alert(`👑 管理員登入成功！\n\n本週（第 ${getCurrentISOWeek()} 週）的隨機專屬密碼為：【 ${correctPasscode} 】\n\n請複製此 4 位數字密碼，並透過 WhatsApp 發送給家長與學生。`);
+            document.getElementById("vip-passcode").value = ""; // 清空輸入框
+            return; 
+        }
+
+        // 判斷是否為正確的學生密碼
         if (userInput === correctPasscode) {
-            alert("🎓 恭喜！風穎教育 VIP 在讀學生身份驗證成功，已為您開啟【歷屆手寫筆記總庫】！");
+            alert("🎓 恭喜！密碼驗證成功，已為您開啟【歷屆手寫筆記總庫】！");
             document.getElementById("weekly-share-panel").style.display = "none";
             document.getElementById("vip-archive-area").style.display = "block";
             
@@ -1382,9 +1379,10 @@
             const gradeCode = selectElement.value.toLowerCase();
             const gradeName = selectElement.options[selectElement.selectedIndex].text.split(" ")[0];
             
+            document.getElementById("vip-archive-list").innerHTML = '<p style="color: #7f8c8d; font-size: 14px; text-align: center;">系統正在掃描伺服器檔案，請稍候...</p>';
             checkAndRenderNotes(gradeCode, gradeName, true);
         } else {
-            alert(`❌ 密碼不正確或已過期。\n\n提示：當週 VIP 密碼為「fwsunsir + 本週一日期」。`);
+            alert(`❌ 密碼不正確。`);
         }
     }
 
