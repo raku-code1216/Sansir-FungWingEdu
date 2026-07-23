@@ -1167,27 +1167,30 @@
             </div>
         </section>
 
-      <!-- ========================================== -->
+    <!-- ========================================== -->
 <!-- 風穎教育 - 每週特訓與 VIP 全自動歷屆總庫專區 -->
 <!-- ========================================== -->
 <div style="max-width: 850px; margin: 30px auto; padding: 25px; border: 2px solid #2980b9; border-radius: 12px; background-color: #f4f9fc; box-shadow: 0 4px 10px rgba(0,0,0,0.08); font-family: 'PingFang HK', 'Microsoft JhengHei', sans-serif;">
     
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
         <span style="background-color: #e74c3c; color: #fff; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 14px;">🔥 燊Sir 每週拔尖特訓專區</span>
-        <span style="font-size: 13px; color: #7f8c8d; font-weight: bold;">🗓️ 全自動智能派發 ✖️ 自選 P1–P6 年級</span>
+        <span style="font-size: 13px; color: #7f8c8d; font-weight: bold;">🗓️ 雙軌密碼全自動派發 ✖️ 自選 P1–P6 年級</span>
     </div>
 
     <h2 style="color: #2c3e50; margin: 10px 0; font-size: 20px;">【免費領取】風穎教育小學數學手寫解題秘笈</h2>
     <p style="color: #555; line-height: 1.6; font-size: 14px;">
-        請選擇小朋友就讀的年級，點擊分享至 WhatsApp，即可瞬間解鎖該年級最新的<b>「拔尖手寫思維筆記與實戰題庫 PDF」</b>！
+        請先選擇小朋友就讀的年級，並輸入由 燊Sir 提供的專屬密碼，即可瞬間解鎖！
+        <br><span style="color: #e74c3c; font-weight: bold; font-size: 13px;">⚠️ 每週限定領取一份最新特訓，過期無法回溯！未報讀家長請 WhatsApp 燊Sir 索取本週免費密碼。</span>
     </p>
 
     <!-- 主控板區域 -->
     <div id="weekly-share-panel" style="background: #ffffff; padding: 20px; border-radius: 8px; border: 1px solid #d6eaf8; text-align: center; margin-top: 15px;">
         
         <label for="weekly-grade-select" style="font-weight: bold; color: #34495e; font-size: 15px; display: block; margin-bottom: 8px;">
-            📌 第一步：請選擇目標年級
+            📌 第一步：請選擇目標年級 (P1-P6)
         </label>
+        
+        <!-- 這裡就是家長選擇年級的下拉式選單 (Dropdown Menu) -->
         <select id="weekly-grade-select" style="padding: 10px 15px; font-size: 15px; border-radius: 6px; border: 1px solid #bdc3c7; width: 85%; max-width: 320px; margin-bottom: 15px;">
             <option value="P1">小一 (Primary 1) - 最新手寫特訓筆記</option>
             <option value="P2">小二 (Primary 2) - 最新手寫特訓筆記</option>
@@ -1196,32 +1199,25 @@
             <option value="P5">小五 (Primary 5) - 最新手寫特訓筆記</option>
             <option value="P6" selected>小六 (Primary 6) - 最新手寫特訓筆記</option>
         </select>
-
         <br>
-
-        <button id="weekly-share-btn" onclick="executeWeeklyShare()" style="background-color: #25D366; color: white; border: none; padding: 12px 25px; font-size: 16px; font-weight: bold; border-radius: 25px; cursor: pointer; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.15);">
-            📲 第二步：分享至 WhatsApp 領取最新筆記
+        
+        <label for="vip-passcode" style="font-weight: bold; color: #34495e; font-size: 15px; display: block; margin-bottom: 8px; margin-top: 10px;">
+            🔑 第二步：請輸入解鎖密碼
+        </label>
+        <!-- 密碼輸入框 -->
+        <input type="text" id="vip-passcode" placeholder="輸入免費或 VIP 專屬密碼" style="padding: 10px; font-size: 15px; border: 1px solid #ccc; border-radius: 4px; width: 85%; max-width: 240px; margin-bottom: 15px;">
+        <br>
+        <button onclick="unlockByVip()" style="background-color: #2980b9; color: white; border: none; padding: 12px 25px; font-size: 16px; font-weight: bold; border-radius: 25px; cursor: pointer; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.15);">
+            🔓 立即解鎖筆記
         </button>
-
-        <!-- VIP 登入通道 -->
-        <div style="margin-top: 15px; border-top: 1px dashed #e0e0e0; padding-top: 10px;">
-            <a href="javascript:void(0);" onclick="toggleVipPanel()" style="color: #7f8c8d; font-size: 13px; text-decoration: underline;">
-                🎓 風穎教育現有學生？點此登入 VIP 歷屆筆記總庫
-            </a>
-            
-            <div id="vip-input-box" style="display: none; margin-top: 10px;">
-                <input type="password" id="vip-passcode" placeholder="輸入 VIP 專屬密碼" style="padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; width: 240px; text-transform: lowercase;">
-                <button onclick="unlockByVip()" style="padding: 8px 15px; background-color: #34495e; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">解鎖總庫</button>
-            </div>
-        </div>
     </div>
 
-    <!-- 一般家長：解鎖顯示區 -->
+    <!-- 一般家長：單週解鎖顯示區 -->
     <div id="weekly-unlocked-area" style="display: none; margin-top: 20px; padding: 20px; background-color: #eafaf1; border-left: 5px solid #2ecc71; border-radius: 5px;">
-        <h3 style="color: #27ae60; margin-top: 0; font-size: 18px;">🎉 專屬手寫筆記已成功解鎖！</h3>
+        <h3 style="color: #27ae60; margin-top: 0; font-size: 18px;">🎉 本週最新特訓筆記已成功解鎖！</h3>
         <p id="weekly-unlocked-info" style="color: #2c3e50; font-size: 15px; margin-bottom: 15px;"></p>
-        <a id="weekly-pdf-link" href="#" target="_blank" style="display: inline-block; background-color: #2980b9; color: white; padding: 12px 22px; border-radius: 6px; text-decoration: none; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-            📄 點擊查看 / 下載最新特訓 PDF
+        <a id="weekly-pdf-link" href="#" target="_blank" style="display: inline-block; background-color: #27ae60; color: white; padding: 12px 22px; border-radius: 6px; text-decoration: none; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            📄 點擊查看 / 下載本週特訓 PDF
         </a>
     </div>
 
@@ -1250,29 +1246,17 @@
         return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
     }
 
-// 動態生成當週隨機密碼 (利用年份與週數生成 4 位數字 PIN 碼)
-    function getValidWeeklyPasscode() {
+    function getPasscodes() {
         const year = new Date().getFullYear();
         const week = getCurrentISOWeek();
         
-        // 建立一個基於年份與週數的偽隨機演算法，確保一週內的隨機數保持不變
-        const seed = year * 100 + week; 
-        const randomPin = Math.floor(Math.abs(Math.sin(seed) * 10000)).toString().padStart(4, '0');
+        const seedFree = year * 100 + week; 
+        const seedVip = year * 1000 + week; 
         
-        return randomPin; 
-    }
-
-    function checkWeeklyShareStatus() {
-        const lastShareWeek = localStorage.getItem("fw_last_share_week");
-        const currentWeek = `${new Date().getFullYear()}-W${getCurrentISOWeek()}`;
-
-        if (lastShareWeek === currentWeek) {
-            const btn = document.getElementById("weekly-share-btn");
-            btn.style.backgroundColor = "#95a5a6";
-            btn.innerText = "✅ 本週已領取手寫筆記（下週一自動開放）";
-            btn.disabled = true;
-            btn.style.cursor = "not-allowed";
-        }
+        const freePin = Math.floor(Math.abs(Math.sin(seedFree) * 10000)).toString().padStart(4, '0');
+        const vipPin = Math.floor(Math.abs(Math.cos(seedVip) * 10000)).toString().padStart(4, '0');
+        
+        return { freePin, vipPin };
     }
 
     async function checkAndRenderNotes(gradeCode, gradeName, isVip = false) {
@@ -1330,59 +1314,38 @@
         }
     }
 
-    function executeWeeklyShare() {
-        const selectElement = document.getElementById("weekly-grade-select");
-        const selectedGrade = selectElement.value;
-        const gradeCode = selectedGrade.toLowerCase();
-        const gradeName = selectElement.options[selectElement.selectedIndex].text.split(" ")[0];
-        
-        const shareText = encodeURIComponent(`推薦燊Sir主理的風穎教育網站！每週分享即可免費領取【${gradeName}】數學拔尖手寫解題筆記：https://thesunconceptfw.com`);
-        const whatsappUrl = `https://api.whatsapp.com/send?text=${shareText}`;
-        window.open(whatsappUrl, '_blank');
-
-        const currentWeek = `${new Date().getFullYear()}-W${getCurrentISOWeek()}`;
-        localStorage.setItem("fw_last_share_week", currentWeek);
-
-        setTimeout(function() {
-            document.getElementById("weekly-share-panel").style.display = "none";
-            document.getElementById("weekly-unlocked-area").style.display = "block";
-            checkAndRenderNotes(gradeCode, gradeName, false);
-            checkWeeklyShareStatus();
-        }, 1000);
-    }
-
-    function toggleVipPanel() {
-        const box = document.getElementById("vip-input-box");
-        box.style.display = box.style.display === "none" ? "block" : "none";
-    }
-
-// 密碼登入與管理員驗證
     function unlockByVip() {
         const userInput = document.getElementById("vip-passcode").value.trim();
-        const correctPasscode = getValidWeeklyPasscode(); 
-        const managerPasscode = "20021216"; // 燊Sir 專屬管理員密碼
+        const { freePin, vipPin } = getPasscodes(); 
+        const managerPasscode = "20021216"; 
 
-        // 判斷是否為管理員登入
         if (userInput === managerPasscode) {
-            alert(`👑 管理員登入成功！\n\n本週（第 ${getCurrentISOWeek()} 週）的隨機專屬密碼為：【 ${correctPasscode} 】\n\n請複製此 4 位數字密碼，並透過 WhatsApp 發送給家長與學生。`);
-            document.getElementById("vip-passcode").value = ""; // 清空輸入框
+            alert(`👑 管理員登入成功！\n\n本週（第 ${getCurrentISOWeek()} 週）密碼如下：\n\n🟢 免費家長密碼（單週）：【 ${freePin} 】\n🔴 VIP 學生密碼（總庫）：【 ${vipPin} 】\n\n請複製密碼發送給家長與學生。`);
+            document.getElementById("vip-passcode").value = ""; 
             return; 
         }
 
-        // 判斷是否為正確的學生密碼
-        if (userInput === correctPasscode) {
-            alert("🎓 恭喜！密碼驗證成功，已為您開啟【歷屆手寫筆記總庫】！");
+        const selectElement = document.getElementById("weekly-grade-select");
+        const gradeCode = selectElement.value.toLowerCase();
+        const gradeName = selectElement.options[selectElement.selectedIndex].text.split(" ")[0];
+
+        if (userInput === vipPin) {
+            alert("🎓 恭喜！VIP 身份驗證成功，已為您開啟【歷屆手寫筆記總庫】！");
             document.getElementById("weekly-share-panel").style.display = "none";
             document.getElementById("vip-archive-area").style.display = "block";
             
-            const selectElement = document.getElementById("weekly-grade-select");
-            const gradeCode = selectElement.value.toLowerCase();
-            const gradeName = selectElement.options[selectElement.selectedIndex].text.split(" ")[0];
-            
             document.getElementById("vip-archive-list").innerHTML = '<p style="color: #7f8c8d; font-size: 14px; text-align: center;">系統正在掃描伺服器檔案，請稍候...</p>';
             checkAndRenderNotes(gradeCode, gradeName, true);
-        } else {
-            alert(`❌ 密碼不正確。`);
+        } 
+        else if (userInput === freePin) {
+            alert("🎉 免費密碼驗證成功！已為您解鎖本週最新特訓筆記！");
+            document.getElementById("weekly-share-panel").style.display = "none";
+            document.getElementById("weekly-unlocked-area").style.display = "block";
+            
+            checkAndRenderNotes(gradeCode, gradeName, false);
+        } 
+        else {
+            alert(`❌ 密碼不正確。請向 燊Sir 索取最新密碼。`);
         }
     }
 
