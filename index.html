@@ -1299,7 +1299,9 @@
         if (!isVip) {
             if (latestAvailableWeek) {
                 document.getElementById("weekly-unlocked-info").innerText = `您已成功解鎖【${gradeName}】最新手寫解題秘笈！`;
-                document.getElementById("weekly-pdf-link").href = `./notes/${gradeCode}_extranotes_${latestAvailableWeek}.pdf`;
+                //document.getElementById("weekly-pdf-link").href = `./notes/${gradeCode}_extranotes_${latestAvailableWeek}.pdf`;
+                // 用作測試的硬編碼（強制讀取 P5 第 30 週筆記）
+document.getElementById("weekly-pdf-link").href = "./notes/p5_extranotes_30.pdf";
                 document.getElementById("weekly-pdf-link").style.display = "inline-block";
             } else {
                 document.getElementById("weekly-unlocked-info").innerText = `本年級最新筆記正在緊急編製中，請稍後再來！`;
