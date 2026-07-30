@@ -1227,6 +1227,7 @@
             📄 點擊查看 / 下載本週特訓 PDF
         </a>
     </div>
+    <div id="archive-list" style="margin-top: 20px; text-align: left;"></div>
 
     <!-- VIP 在讀學生：全自動歷屆筆記總庫區 -->
     <div id="vip-archive-area" style="display: none; margin-top: 20px; padding: 20px; background-color: #fef9e7; border: 2px solid #f39c12; border-radius: 8px;">
@@ -1301,6 +1302,16 @@
                 document.getElementById("weekly-unlocked-info").innerText = `您已成功解鎖【${gradeName}】最新手寫解題秘笈！`;
                 document.getElementById("weekly-pdf-link").href = `./notes/${gradeCode}_extranotes_${latestAvailableWeek}.pdf`;
                 document.getElementById("weekly-pdf-link").style.display = "inline-block";
+                let archiveHtml = `<h4 style="color: #c0392b;">📚 過往特訓筆記庫 (Archive)</h4><ul>`;
+for (let i = 1; i <= latestAvailableWeek; i++) {
+    archiveHtml += `<li style="margin-bottom: 8px;">
+        <a href="./notes/${gradeCode}_extranotes_${i}.pdf" target="_blank" style="color: #2980b9; text-decoration: none;">
+            📥 下載第 ${i} 週特訓筆記
+        </a>
+    </li>`;
+}
+archiveHtml += `</ul>`;
+document.getElementById("archive-list").innerHTML = archiveHtml;
             } else {
                 document.getElementById("weekly-unlocked-info").innerText = `本年級最新筆記正在緊急編製中，請稍後再來！`;
                 document.getElementById("weekly-pdf-link").style.display = "none";
