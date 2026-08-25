@@ -1246,6 +1246,11 @@
 <script>
     const SYSTEM_START_WEEK = 30; 
 
+    // ▼▼ 請在這裡填寫你的 GitHub 資訊 ▼▼
+    const GITHUB_USERNAME = "你的GitHub帳號"; 
+    const GITHUB_REPO = "你的倉庫名稱"; 
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
     function getCurrentISOWeek() {
         const d = new Date();
         d.setHours(0, 0, 0, 0);
@@ -1267,66 +1272,96 @@
         return { freePin, vipPin };
     }
 
+    // ★ 這是全新的 GitHub API 自動抓取檔名版本 ★
     async function checkAndRenderNotes(gradeCode, gradeName, isVip = false) {
-        const currentWeek = getCurrentISOWeek();
-        let latestAvailableWeek = null;
         let archiveHtml = `<h4 style="color: #d35400; margin-top: 0; margin-bottom: 15px;">📚 ${gradeName} 歷屆手寫筆記目錄</h4>`;
         let hasArchive = false;
+        let latestFile = null;
+        let latestWeek = 0;
+        let allNotes = [];
 
-        for (let w = currentWeek; w >= SYSTEM_START_WEEK; w--) {
-            const fileUrl = `./notes/${gradeCode}_extranotes_${w}.pdf`;
+        try {
+            // 呼叫 GitHub API 取得 notes 資料夾內的檔案
+            const apiUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/notes`;
+            const response = await fetch(apiUrl);
             
-            try {
-                const response = await fetch(fileUrl, { method: 'HEAD', cache: 'no-cache' });
+            if (response.ok) {
+                const files = await response.json();
                 
-                if (response.ok) {
-                    if (latestAvailableWeek === null) {
-                        latestAvailableWeek = w; 
-                    } 
-                    
-                    if (isVip && w !== latestAvailableWeek) {
-                        archiveHtml += `<div style="padding: 10px; border-bottom: 1px dashed #f0e4d2; text-align: left; display: flex; justify-content: space-between;">`;
-                        archiveHtml += `<span style="color: #34495e;">🗓️ <strong>第 ${w} 週：</strong> ${gradeName} 拔尖特訓</span>`;
-                        archiveHtml += `<a href="${fileUrl}" target="_blank" style="color: #2980b9; text-decoration: underline; font-weight: bold;">下載 PDF</a>`;
-                        archiveHtml += `</div>`;
-                        hasArchive = true;
+                files.forEach(file => {
+                    // 只尋找檔名開頭是 p1_extranotes_ (或其他年級) 且結尾是 .pdf 的檔案
+                    if (file.name.startsWith(`${gradeCode}_extranotes_`) && file.name.endsWith('.pdf')) {
+                        // 檔名格式預期為：p6_extranotes_30_圓周與圓面積計算.pdf
+                        const nameParts = file.name.replace('.pdf', '').split('_');
+                        const weekNum = parseInt(nameParts[2]);
+                        const topicName = nameParts[3] ? nameParts[3] : ""; // 自動抓取最後一個底線後面的文字
+
+                        allNotes.push({
+                            week: weekNum,
+                            topic: topicName,
+                            url: file.download_url
+                        });
+
+                        if (weekNum > latestWeek) {
+                            latestWeek = weekNum;
+                            latestFile = allNotes[allNotes.length - 1];
+                        }
                     }
-                }
-            } catch (error) {
-                console.log(`Week ${w} notes not found.`);
+                });
+
+                // 按週數從大到小排序
+                allNotes.sort((a, b) => b.week - a.week);
             }
+        } catch (error) {
+            console.error("無法讀取 GitHub 檔案列表，請確定倉庫為公開狀態", error);
         }
 
         if (!isVip) {
-            if (latestAvailableWeek) {
-                document.getElementById("weekly-unlocked-info").innerText = `您已成功解鎖【${gradeName}】最新手寫解題秘笈！`;
-                document.getElementById("weekly-pdf-link").href = `./notes/${gradeCode}_extranotes_${latestAvailableWeek}.pdf`;
+            if (latestFile) {
+                const topicDisplay = latestFile.topic ? ` - ${latestFile.topic}` : "";
+                
+                document.getElementById("weekly-unlocked-info").innerHTML = `您已成功解鎖【${gradeName}】最新手寫解題秘笈！<br><strong style="color:#e74c3c; font-size: 16px; display:inline-block; margin-top:8px;">本週課題：${topicDisplay || "拔尖特訓"}</strong>`;
+                document.getElementById("weekly-pdf-link").href = latestFile.url;
                 document.getElementById("weekly-pdf-link").style.display = "inline-block";
-                let archiveHtml = `<h4 style="color: #c0392b;">📚 過往特訓筆記庫 (Archive)</h4><ul>`;
-for (let i = 1; i <= latestAvailableWeek; i++) {
-    archiveHtml += `<li style="margin-bottom: 8px;">
-        <a href="./notes/${gradeCode}_extranotes_${i}.pdf" target="_blank" style="color: #2980b9; text-decoration: none;">
-            📥 下載第 ${i} 週特訓筆記
-        </a>
-    </li>`;
-}
-archiveHtml += `</ul>`;
-document.getElementById("archive-list").innerHTML = archiveHtml;
+                
+                let archiveListHtml = `<h4 style="color: #c0392b;">📚 過往特訓筆記庫 (Archive)</h4><ul>`;
+                allNotes.forEach(note => {
+                    const topicSpan = note.topic ? ` <span style="color:#7f8c8d; font-size:13px;">(${note.topic})</span>` : "";
+                    archiveListHtml += `<li style="margin-bottom: 8px;">
+                        <a href="${note.url}" target="_blank" style="color: #2980b9; text-decoration: none;">
+                            📥 下載第 ${note.week} 週特訓筆記${topicSpan}
+                        </a>
+                    </li>`;
+                });
+                archiveListHtml += `</ul>`;
+                document.getElementById("archive-list").innerHTML = archiveListHtml;
             } else {
                 document.getElementById("weekly-unlocked-info").innerText = `本年級最新筆記正在緊急編製中，請稍後再來！`;
                 document.getElementById("weekly-pdf-link").style.display = "none";
+                document.getElementById("archive-list").innerHTML = "";
             }
         } else {
-            if (latestAvailableWeek) {
-                let latestHtml = `<div style="padding: 10px; text-align: left; display: flex; justify-content: space-between; background-color: #fdf2e9; border-radius: 4px; margin-bottom: 15px;">`;
-                latestHtml += `<span style="color: #c0392b;">🔥 <strong>最新一期特訓 (第 ${latestAvailableWeek} 週)：</strong> ${gradeName} 拔尖特訓</span>`;
-                latestHtml += `<a href="./notes/${gradeCode}_extranotes_${latestAvailableWeek}.pdf" target="_blank" style="color: #c0392b; text-decoration: underline; font-weight: bold;">下載 PDF</a>`;
-                latestHtml += `</div>`;
-                archiveHtml = latestHtml + archiveHtml;
+            if (allNotes.length > 0) {
+                allNotes.forEach((note, index) => {
+                    const topicSpan = note.topic ? ` - <span style="color:#e74c3c;">${note.topic}</span>` : "";
+                    
+                    if (index === 0) {
+                        archiveHtml += `<div style="padding: 10px; text-align: left; display: flex; justify-content: space-between; background-color: #fdf2e9; border-radius: 4px; margin-bottom: 15px;">`;
+                        archiveHtml += `<span style="color: #c0392b;">🔥 <strong>最新 (第 ${note.week} 週)：</strong> ${gradeName} 拔尖特訓 ${topicSpan}</span>`;
+                        archiveHtml += `<a href="${note.url}" target="_blank" style="color: #c0392b; text-decoration: underline; font-weight: bold;">下載 PDF</a>`;
+                        archiveHtml += `</div>`;
+                    } else {
+                        archiveHtml += `<div style="padding: 10px; border-bottom: 1px dashed #f0e4d2; text-align: left; display: flex; justify-content: space-between;">`;
+                        archiveHtml += `<span style="color: #34495e;">🗓️ <strong>第 ${note.week} 週：</strong> ${gradeName} 拔尖特訓 ${topicSpan}</span>`;
+                        archiveHtml += `<a href="${note.url}" target="_blank" style="color: #2980b9; text-decoration: underline; font-weight: bold;">下載 PDF</a>`;
+                        archiveHtml += `</div>`;
+                    }
+                });
+                hasArchive = true;
             }
             
-            if (!hasArchive && latestAvailableWeek === null) {
-                archiveHtml += "<p style='color: #7f8c8d; font-size: 14px;'>目前伺服器尚未有任何歸檔筆記。</p>";
+            if (!hasArchive) {
+                archiveHtml += "<p style='color: #7f8c8d; font-size: 14px;'>目前尚未有任何歸檔筆記。</p>";
             }
             document.getElementById("vip-archive-list").innerHTML = archiveHtml;
         }
@@ -1352,7 +1387,7 @@ document.getElementById("archive-list").innerHTML = archiveHtml;
             document.getElementById("weekly-share-panel").style.display = "none";
             document.getElementById("vip-archive-area").style.display = "block";
             
-            document.getElementById("vip-archive-list").innerHTML = '<p style="color: #7f8c8d; font-size: 14px; text-align: center;">系統正在掃描伺服器檔案，請稍候...</p>';
+            document.getElementById("vip-archive-list").innerHTML = '<p style="color: #7f8c8d; font-size: 14px; text-align: center;">系統正在讀取雲端筆記資料，請稍候...</p>';
             checkAndRenderNotes(gradeCode, gradeName, true);
         } 
         else if (userInput === freePin) {
@@ -1373,7 +1408,7 @@ document.getElementById("archive-list").innerHTML = archiveHtml;
             const gradeCode = selectElement.value.toLowerCase();
             const gradeName = selectElement.options[selectElement.selectedIndex].text.split(" ")[0];
             
-            document.getElementById("vip-archive-list").innerHTML = '<p style="color: #7f8c8d; font-size: 14px; text-align: center;">系統正在掃描伺服器檔案，請稍候...</p>';
+            document.getElementById("vip-archive-list").innerHTML = '<p style="color: #7f8c8d; font-size: 14px; text-align: center;">系統正在讀取雲端筆記資料，請稍候...</p>';
             checkAndRenderNotes(gradeCode, gradeName, true);
         }
     });
