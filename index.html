@@ -1296,12 +1296,12 @@
                         const weekNum = parseInt(nameParts[2]);
                         const topicName = nameParts[3] ? nameParts[3] : ""; // 自動抓取最後一個底線後面的文字
 
-// ▼▼ 替換成這段 ▼▼
+// ▼▼ 把剛剛 allNotes.push 那邊替換回這樣 ▼▼
 allNotes.push({
     week: weekNum,
     topic: topicName,
-    // 使用 jsDelivr 加速器，完美支援中文檔名，並強制瀏覽器「預覽」PDF
-    url: `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${GITHUB_REPO}/notes/${encodeURIComponent(file.name)}`
+    // 直接使用 GitHub API 提供的官方真實檔案連結，這是最不可能出錯的！
+    url: file.download_url 
 });
 
                         if (weekNum > latestWeek) {
