@@ -1318,26 +1318,28 @@ allNotes.push({
             console.error("無法讀取 GitHub 檔案列表，請確定倉庫為公開狀態", error);
         }
 
+// ▼▼ 替換成這段修復版 ▼▼
         if (!isVip) {
             if (latestFile) {
                 const topicDisplay = latestFile.topic ? ` - ${latestFile.topic}` : "";
                 
+                // 只給最新一週的筆記
                 document.getElementById("weekly-unlocked-info").innerHTML = `您已成功解鎖【${gradeName}】最新手寫解題秘笈！<br><strong style="color:#e74c3c; font-size: 16px; display:inline-block; margin-top:8px;">本週課題：${topicDisplay || "拔尖特訓"}</strong>`;
                 document.getElementById("weekly-pdf-link").href = latestFile.url;
                 document.getElementById("weekly-pdf-link").style.display = "inline-block";
                 
-                let archiveListHtml = `<h4 style="color: #c0392b;">📚 過往特訓筆記庫 (Archive)</h4><ul>`;
-                allNotes.forEach(note => {
-                    const topicSpan = note.topic ? ` <span style="color:#7f8c8d; font-size:13px;">(${note.topic})</span>` : "";
-                    archiveListHtml += `<li style="margin-bottom: 8px;">
-                        <a href="${note.url}" target="_blank" style="color: #2980b9; text-decoration: none;">
-                            📥 下載第 ${note.week} 週特訓筆記${topicSpan}
-                        </a>
-                    </li>`;
-                });
-                archiveListHtml += `</ul>`;
-                document.getElementById("archive-list").innerHTML = archiveListHtml;
+                // ✅ 確保不會印出過往連結，並加上巧妙的推銷提示
+                if (document.getElementById("archive-list")) {
+                    document.getElementById("archive-list").innerHTML = `<p style="color: #95a5a6; font-size: 13px; margin-top: 20px; border-top: 1px dashed #ecf0f1; padding-top: 15px;">🔒 歷屆過往筆記已鎖藏。<br>（如需瀏覽全學期總庫，需成為 風穎 VIP 學生，並使用專屬密碼解鎖）</p>`;
+                }
             } else {
+                document.getElementById("weekly-unlocked-info").innerText = `本年級最新筆記正在緊急編製中，請稍後再來！`;
+                document.getElementById("weekly-pdf-link").style.display = "none";
+                if (document.getElementById("archive-list")) {
+                    document.getElementById("archive-list").innerHTML = "";
+                }
+            }
+        }
                 document.getElementById("weekly-unlocked-info").innerText = `本年級最新筆記正在緊急編製中，請稍後再來！`;
                 document.getElementById("weekly-pdf-link").style.display = "none";
                 document.getElementById("archive-list").innerHTML = "";
