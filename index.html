@@ -1300,8 +1300,8 @@
 allNotes.push({
     week: weekNum,
     topic: topicName,
-    // 改用你網站自己的相對路徑，並將中文字安全編碼
-    url: './notes/' + encodeURIComponent(file.name) 
+    // 絕對網址：直接指向你的專屬網域，讓瀏覽器自然讀取中文字
+    url: 'https://thesunconceptfw.com/notes/' + file.name
 });
 
                         if (weekNum > latestWeek) {
