@@ -1296,11 +1296,13 @@
                         const weekNum = parseInt(nameParts[2]);
                         const topicName = nameParts[3] ? nameParts[3] : ""; // 自動抓取最後一個底線後面的文字
 
-                        allNotes.push({
-                            week: weekNum,
-                            topic: topicName,
-                            url: file.download_url
-                        });
+// ▼▼ 替換成這段 ▼▼
+allNotes.push({
+    week: weekNum,
+    topic: topicName,
+    // 改用你網站自己的相對路徑，並將中文字安全編碼
+    url: './notes/' + encodeURIComponent(file.name) 
+});
 
                         if (weekNum > latestWeek) {
                             latestWeek = weekNum;
