@@ -1273,6 +1273,7 @@
     }
 
     // ★ 這是全新的 GitHub API 自動抓取檔名版本 ★
+  // ▼▼ 把舊的 checkAndRenderNotes 整個刪掉，換成下面這整段 ▼▼
     async function checkAndRenderNotes(gradeCode, gradeName, isVip = false) {
         let archiveHtml = `<h4 style="color: #d35400; margin-top: 0; margin-bottom: 15px;">📚 ${gradeName} 歷屆手寫筆記目錄</h4>`;
         let hasArchive = false;
@@ -1281,7 +1282,6 @@
         let allNotes = [];
 
         try {
-            // 呼叫 GitHub API 取得 notes 資料夾內的檔案
             const apiUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/notes`;
             const response = await fetch(apiUrl);
             
@@ -1289,48 +1289,44 @@
                 const files = await response.json();
                 
                 files.forEach(file => {
-                    // 只尋找檔名開頭是 p1_extranotes_ (或其他年級) 且結尾是 .pdf 的檔案
-                    if (file.name.startsWith(`${gradeCode}_extranotes_`) && file.name.endsWith('.pdf')) {
-                        // 檔名格式預期為：p6_extranotes_30_圓周與圓面積計算.pdf
-                        const nameParts = file.name.replace('.pdf', '').split('_');
+                    // 無視大小寫，尋找符合年級的 PDF
+                    if (file.name.toLowerCase().startsWith(`${gradeCode}_extranotes_`) && file.name.toLowerCase().endsWith('.pdf')) {
+                        const nameParts = file.name.replace('.pdf', '').replace('.PDF', '').split('_');
                         const weekNum = parseInt(nameParts[2]);
-                        const topicName = nameParts[3] ? nameParts[3] : ""; // 自動抓取最後一個底線後面的文字
+                        const topicName = nameParts[3] ? nameParts[3] : ""; // 抓取最後的課題名稱
 
-// ▼▼ 替換成這段 ▼▼
-allNotes.push({
-    week: weekNum,
-    topic: topicName,
-    // 透過 CDN 直接抓取原始檔案，零時差、保證 100% 預覽成功！
-    url: `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${GITHUB_REPO}@main/notes/${file.name}`
-});
-
-                        if (weekNum > latestWeek) {
-                            latestWeek = weekNum;
-                            latestFile = allNotes[allNotes.length - 1];
-                        }
+                        allNotes.push({
+                            week: weekNum,
+                            topic: topicName,
+                            // 這裡維持原本正常運作的路徑設定
+                            url: `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${GITHUB_REPO}@main/notes/${file.name}` 
+                        });
                     }
                 });
 
-                // 按週數從大到小排序
+                // 把筆記按照週數由大到小排序
                 allNotes.sort((a, b) => b.week - a.week);
+                
+                if (allNotes.length > 0) {
+                    latestFile = allNotes[0]; // 排序後，第一筆就是最新的一週
+                }
             }
         } catch (error) {
-            console.error("無法讀取 GitHub 檔案列表，請確定倉庫為公開狀態", error);
+            console.error("API讀取失敗", error);
         }
 
-// ▼▼ 替換成這段修復版 ▼▼
+        // 🟢 這裡是修復好的「免費家長」區塊（只能看最新一週）
         if (!isVip) {
             if (latestFile) {
                 const topicDisplay = latestFile.topic ? ` - ${latestFile.topic}` : "";
                 
-                // 只給最新一週的筆記
                 document.getElementById("weekly-unlocked-info").innerHTML = `您已成功解鎖【${gradeName}】最新手寫解題秘笈！<br><strong style="color:#e74c3c; font-size: 16px; display:inline-block; margin-top:8px;">本週課題：${topicDisplay || "拔尖特訓"}</strong>`;
                 document.getElementById("weekly-pdf-link").href = latestFile.url;
                 document.getElementById("weekly-pdf-link").style.display = "inline-block";
                 
-                // ✅ 確保不會印出過往連結，並加上巧妙的推銷提示
+                // 巧妙隱藏歷史筆記，並顯示 VIP 提示
                 if (document.getElementById("archive-list")) {
-                    document.getElementById("archive-list").innerHTML = `<p style="color: #95a5a6; font-size: 13px; margin-top: 20px; border-top: 1px dashed #ecf0f1; padding-top: 15px;">🔒 歷屆過往筆記已鎖藏。<br>（如需瀏覽全學期總庫，需成為 風穎 VIP 學生，並使用專屬密碼解鎖）</p>`;
+                    document.getElementById("archive-list").innerHTML = `<p style="color: #95a5a6; font-size: 13px; margin-top: 20px; border-top: 1px dashed #ecf0f1; padding-top: 15px;">🔒 歷屆過往筆記已鎖藏。<br>（如需瀏覽全學期總庫，請向 燊Sir 索取 VIP 專屬密碼解鎖）</p>`;
                 }
             } else {
                 document.getElementById("weekly-unlocked-info").innerText = `本年級最新筆記正在緊急編製中，請稍後再來！`;
@@ -1339,12 +1335,9 @@ allNotes.push({
                     document.getElementById("archive-list").innerHTML = "";
                 }
             }
-        }
-                document.getElementById("weekly-unlocked-info").innerText = `本年級最新筆記正在緊急編製中，請稍後再來！`;
-                document.getElementById("weekly-pdf-link").style.display = "none";
-                document.getElementById("archive-list").innerHTML = "";
-            }
-        } else {
+        } 
+        // 🔴 這裡是「VIP 家長」區塊（顯示所有筆記）
+        else {
             if (allNotes.length > 0) {
                 allNotes.forEach((note, index) => {
                     const topicSpan = note.topic ? ` - <span style="color:#e74c3c;">${note.topic}</span>` : "";
@@ -1370,7 +1363,8 @@ allNotes.push({
             document.getElementById("vip-archive-list").innerHTML = archiveHtml;
         }
     }
-
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+    
     function unlockByVip() {
         const userInput = document.getElementById("vip-passcode").value.trim();
         const { freePin, vipPin } = getPasscodes(); 
