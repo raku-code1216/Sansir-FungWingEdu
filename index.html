@@ -1300,8 +1300,8 @@
 allNotes.push({
     week: weekNum,
     topic: topicName,
-    // 絕對網址：直接指向你的專屬網域，讓瀏覽器自然讀取中文字
-    url: 'https://thesunconceptfw.com/notes/' + file.name
+    // 使用 jsDelivr 加速器，完美支援中文檔名，並強制瀏覽器「預覽」PDF
+    url: `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${GITHUB_REPO}/notes/${encodeURIComponent(file.name)}`
 });
 
                         if (weekNum > latestWeek) {
